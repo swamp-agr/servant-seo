@@ -98,12 +98,12 @@ import           Servant.Seo.UI
 -- >>> type ProtectedAPI = Disallow "admin" :> Get '[HTML] AdminPage
 -- >>> type API = PublicAPI :<|> StaticAPI :<|> ProtectedAPI
 --
--- 'toRobots' function provides API analysis and resulted with 'RobotsInfo' information.
+-- 'toRobots' function provides API analysis and produces 'RobotsInfo'.
 --
 -- >>> toRobots (Proxy :: Proxy API)
 -- RobotsInfo {_robotsSitemapPath = Nothing, _robotsDisallowedPaths = [DisallowedPathPiece "/cdn/static",DisallowedPathPiece "/admin"]}
 --
--- For 'RobotsInfo' you can use existing 'serveRobots' handler.  Resulted @robots.txt@ will be look like:
+-- For 'RobotsInfo' you can use 'serveRobots' handler. @/robots.txt@ will be look like:
 --
 -- >>> let serverUrl = ServerUrl "https://example.com"
 -- >>> Right robotsResponse <- runHandler (serveRobots (ServerUrl "https://example.com") (toRobots (Proxy :: Proxy API)))
@@ -116,7 +116,7 @@ import           Servant.Seo.UI
 -- >>> :t apiWithRobots (Proxy :: Proxy API)
 -- apiWithRobots (Proxy :: Proxy API) :: Proxy (RobotsAPI :<|> API)
 --
--- Both extended with robots API and corresponding robots handler could be used with 'serveWithRobots' helper function.
+-- 'serveWithRobots' provides extension for both initial API and its implementation with 'RobotsAPI'.
 
 -- $howto2
 --
@@ -127,7 +127,8 @@ import           Servant.Seo.UI
 -- >>> type PublicAPI = Get '[HTML] HomePage :<|> "about" :> Get '[HTML] AboutPage :<|> "auth" :> ReqBody '[JSON] Login :> Post '[JSON] NoContent
 -- >>> type API = PublicAPI :<|> StaticAPI :<|> ProtectedAPI
 --
--- Consider for example that Home page could be updated monthly and About page could be updated once per year. Home page will have the highest priority. And about page will have the lowest one.
+-- Consider e.g., that Home page could be updated monthly and About page could be updated once per year.
+-- Home page will have the highest priority. And about page will have the lowest one.
 --
 -- >>> type HomeAPI = Priority '(1,0) :> Frequency 'Monthly :> Get '[HTML] HomePage
 -- >>> type AboutAPI = Frequency 'Yearly :> Priority '(0,1) :> "about" :> Get '[HTML] AboutPage
@@ -140,11 +141,11 @@ import           Servant.Seo.UI
 -- >>> toSitemapInfo (Proxy :: Proxy API)
 -- SitemapInfo {_sitemapInfoEntries = [SitemapEntry {_sitemapPathPieces = [], _sitemapQueryParts = [], _sitemapFrequency = Nothing, _sitemapPriority = Nothing},SitemapEntry {_sitemapPathPieces = [UrlPathPiece "about"], _sitemapQueryParts = [], _sitemapFrequency = Nothing, _sitemapPriority = Nothing}], _sitemapInfoPresent = Just ()}
 --
--- 'toSitemapInfo' will automatically skip all HTTP non-GET requests or other content types like JSON, XML, PlainText and etc.
+-- 'toSitemapInfo' will automatically skip all HTTP non-GET requests or other content types like @JSON@, @XML@, @PlainText@ and etc.
 --
--- Only @Get '[HTML] a@ would be accepted.
+-- Only @Get '[HTML] a@ will be accepted.
 --
--- For 'SitemapInfo' there is also 'serveSitemap' exists.
+-- For 'SitemapInfo' there is also 'serveSitemap' function.
 --
 -- >>> Right sitemapResponse <- runHandler $ serveSitemap serverUrl (Proxy :: Proxy API)
 -- >>> BSL8.putStrLn sitemapResponse
@@ -155,7 +156,7 @@ import           Servant.Seo.UI
 -- >>> :t apiWithSitemap (Proxy :: Proxy API)
 -- apiWithSitemap (Proxy :: Proxy API) :: Proxy (SitemapAPI :<|> API)
 --
--- Both extended with sitemap API and corresponding robots handler could be used with 'serveWithSitemap' helper function.
+-- 'serveWithSitemap' function will extend both API and corresponding handlers with 'SitemapAPI'.
 
 -- $howto3
 --
@@ -166,7 +167,7 @@ import           Servant.Seo.UI
 -- >>> type NewsAPI = "news" :> Capture ":newsurl" NewsUrl :> Get '[HTML] NewsPage
 -- >>> type PublicAPI = HomeAPI :<|> AboutAPI :<|> AuthAPI :<|> NewsAPI
 --
--- In order to obtain sitemap for user-supplied types in API (like 'Capture'), you have to provide instance to 'ToSitemapPathPiece' type class for corresponding captured type, i.e. the way to get the list of available values that could lead to real pages. Otherwise empty list will be supplied and such API branch would be ignored.
+-- In order to obtain sitemap for user supplied types in API (like 'Capture'), you have to provide instance to 'ToSitemapPathPiece' type class for corresponding captured type, i.e. the way to get the list of available values that could lead to real pages. Otherwise, empty list will be supplied and such API branch would be ignored.
 --
 -- >>> instance ToSitemapPathPiece NewsUrl where getPathPiecesForIndexing _ _ = pure $ (NewsUrl . Text.pack . show) <$> [0 .. 10]
 -- >>> toSitemapInfo (Proxy :: Proxy PublicAPI)
@@ -217,4 +218,4 @@ import           Servant.Seo.UI
 -- "User-agent: *\nDisallow /cdn/static\nDisallow /admin\n\nSitemap: https://example.com/sitemap.xml\n"
 --
 -- API extended with sitemap will automatically be populated with link to sitemap xml page.
--- To serve both robots and sitemap look for 'serveWithSeo' helper function.
+-- To serve both robots and sitemap in advance to your API look for 'serveWithSeo' helper function.
