@@ -1,0 +1,6 @@
+.stack-work/
+dist-newstyle
+*~
+*log
+.ghc*
+*.lock
