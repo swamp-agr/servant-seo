@@ -2,18 +2,22 @@ cabal-version: 1.12
 
 name:           servant-seo
 version:        0.1.0
+synopsis:       Generate Robots.txt and Sitemap.xml specification for your servant API.
 description:    Please see the README on GitHub at <https://github.com/swamp-agr/servant-seo#readme>
 homepage:       https://github.com/swamp-agr/servant-seo#readme
 bug-reports:    https://github.com/swamp-agr/servant-seo/issues
 author:         Andrey Prokopenko
 maintainer:     persiantiger@yandex.ru
 copyright:      Andrey Prokopenko (c) 2020
+category:       Web, Servant
 license:        BSD3
 license-file:   LICENSE
 build-type:     Custom
 extra-source-files:
     README.md
     ChangeLog.md
+    example/example.hs
+    example/example.cabal
 
 source-repository head
   type: git
