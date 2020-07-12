@@ -291,7 +291,7 @@ instance (HasPeriod period, HasSitemap api) => HasSitemap (Frequency period :> a
   -- FIXME: compare with previous values, choose frequent one.
   toSitemapInfo _ = do
     sitemap <- toSitemapInfo (Proxy :: Proxy api)
-    pure $ sitemap & sitemapInfoEntries . each %~ (sitemapFrequency . _Just .~ period')
+    pure $ sitemap & sitemapInfoEntries . each %~ (sitemapFrequency .~ Just period')
     where
       period' = getPeriod (Proxy :: Proxy period)
 
@@ -300,7 +300,7 @@ instance (KnownNat n, KnownNat m, HasSitemap api) => HasSitemap (Priority '(n, m
   toSitemapInfo _ = do
     sitemap <- toSitemapInfo (Proxy :: Proxy api)
     -- FIXME: compare with previous values, choose greater one.
-    pure $ sitemap & sitemapInfoEntries . each %~ (sitemapPriority . _Just .~ priority')
+    pure $ sitemap & sitemapInfoEntries . each %~ (sitemapPriority .~ Just priority')
     where
       n' = natVal (Proxy :: Proxy n) & fromInteger @Float
       m' = natVal (Proxy :: Proxy m) & fromInteger @Float
