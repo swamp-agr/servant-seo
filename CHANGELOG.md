@@ -1,4 +1,9 @@
-# Changelog for servant-sitemap
+# Changelog for servant-seo
+
+## 0.1.1 -- 2020-07-12
+
+- Fix frequency processing.
+- Fix priority processing.
 
 ## 0.1.0 -- 2020-07-11
 
