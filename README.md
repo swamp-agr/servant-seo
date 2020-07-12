@@ -1,5 +1,9 @@
 # servant-seo
 
+[![Build Status](https://travis-ci.org/swamp-agr/servant-seo.svg?branch=master)](https://travis-ci.org/swamp-agr/servant-seo)
+
+[![Hackage Status](https://matrix.hackage.haskell.org/api/v2/packages/servant-seo/badge)](https://matrix.hackage.haskell.org/api/v2/packages/servant-seo/badge)
+
 ## Installation
 
 - Add `servant-seo` to project dependencies.
