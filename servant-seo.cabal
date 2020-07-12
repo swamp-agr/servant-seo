@@ -16,7 +16,7 @@ build-type:     Custom
 Tested-with: GHC ==8.4.4 || ==8.6.5 || ==8.8.3
 extra-source-files:
     README.md
-    ChangeLog.md
+    CHANGELOG.md
     example/example.hs
     example/example.cabal
 
