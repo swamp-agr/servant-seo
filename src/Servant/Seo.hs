@@ -135,12 +135,10 @@ import           Servant.Seo.UI
 -- >>> type AuthAPI = "auth" :> ReqBody '[JSON] Login :> Post '[JSON] NoContent
 -- >>> type PublicAPI = HomeAPI :<|> AboutAPI :<|> AuthAPI
 -- >>> type API = PublicAPI :<|> StaticAPI :<|> ProtectedAPI
+-- >>> toSitemapInfo (Proxy :: Proxy API)
+-- SitemapInfo {_sitemapInfoEntries = [SitemapEntry {_sitemapPathPieces = [], _sitemapQueryParts = [], _sitemapFrequency = Just Monthly, _sitemapPriority = Just "1.0"},SitemapEntry {_sitemapPathPieces = [UrlPathPiece "about"], _sitemapQueryParts = [], _sitemapFrequency = Just Yearly, _sitemapPriority = Just "0.1"}], _sitemapInfoPresent = Just ()}
 --
 -- Use 'toSitemapInfo' to get the intermediate sitemap representation of API.
---
--- >>> toSitemapInfo (Proxy :: Proxy API)
--- SitemapInfo {_sitemapInfoEntries = [SitemapEntry {_sitemapPathPieces = [], _sitemapQueryParts = [], _sitemapFrequency = Nothing, _sitemapPriority = Nothing},SitemapEntry {_sitemapPathPieces = [UrlPathPiece "about"], _sitemapQueryParts = [], _sitemapFrequency = Nothing, _sitemapPriority = Nothing}], _sitemapInfoPresent = Just ()}
---
 -- 'toSitemapInfo' will automatically skip all HTTP non-GET requests or other content types like @JSON@, @XML@, @PlainText@ and etc.
 --
 -- Only @Get '[HTML] a@ will be accepted.
@@ -149,7 +147,7 @@ import           Servant.Seo.UI
 --
 -- >>> Right sitemapResponse <- runHandler $ serveSitemap serverUrl (Proxy :: Proxy API)
 -- >>> BSL8.putStrLn sitemapResponse
--- <?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://example.com</loc></url><url><loc>https://example.com/about</loc></url></urlset>
+-- <?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://example.com</loc><changefreq>monthly</changefreq><priority>1.0</priority></url><url><loc>https://example.com/about</loc><changefreq>yearly</changefreq><priority>0.1</priority></url></urlset>
 --
 -- Again, there is helper 'apiWithSitemap'.
 --
@@ -171,10 +169,10 @@ import           Servant.Seo.UI
 --
 -- >>> instance ToSitemapPathPiece NewsUrl where getPathPiecesForIndexing _ _ = pure $ (NewsUrl . Text.pack . show) <$> [0 .. 10]
 -- >>> toSitemapInfo (Proxy :: Proxy PublicAPI)
--- SitemapInfo {_sitemapInfoEntries = [SitemapEntry {_sitemapPathPieces = [], _sitemapQueryParts = [], _sitemapFrequency = Nothing, _sitemapPriority = Nothing},SitemapEntry {_sitemapPathPieces = [UrlPathPiece "about"], _sitemapQueryParts = [], _sitemapFrequency = Nothing, _sitemapPriority = Nothing},SitemapEntry {_sitemapPathPieces = [UrlPathPiece "news",CaptureValues ["0","1","2","3","4","5","6","7","8","9","10"]], _sitemapQueryParts = [], _sitemapFrequency = Nothing, _sitemapPriority = Nothing}], _sitemapInfoPresent = Just ()}
+-- SitemapInfo {_sitemapInfoEntries = [SitemapEntry {_sitemapPathPieces = [], _sitemapQueryParts = [], _sitemapFrequency = Just Monthly, _sitemapPriority = Just "1.0"},SitemapEntry {_sitemapPathPieces = [UrlPathPiece "about"], _sitemapQueryParts = [], _sitemapFrequency = Just Yearly, _sitemapPriority = Just "0.1"},SitemapEntry {_sitemapPathPieces = [UrlPathPiece "news",CaptureValues ["0","1","2","3","4","5","6","7","8","9","10"]], _sitemapQueryParts = [], _sitemapFrequency = Nothing, _sitemapPriority = Nothing}], _sitemapInfoPresent = Just ()}
 -- >>> Right sitemapResponse <- runHandler $ serveSitemap serverUrl (Proxy :: Proxy PublicAPI)
 -- >>> BSL8.putStrLn sitemapResponse
--- <?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://example.com</loc></url><url><loc>https://example.com/about</loc></url><url><loc>https://example.com/news/0</loc></url><url><loc>https://example.com/news/1</loc></url><url><loc>https://example.com/news/2</loc></url><url><loc>https://example.com/news/3</loc></url><url><loc>https://example.com/news/4</loc></url><url><loc>https://example.com/news/5</loc></url><url><loc>https://example.com/news/6</loc></url><url><loc>https://example.com/news/7</loc></url><url><loc>https://example.com/news/8</loc></url><url><loc>https://example.com/news/9</loc></url><url><loc>https://example.com/news/10</loc></url></urlset>
+-- <?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://example.com</loc><changefreq>monthly</changefreq><priority>1.0</priority></url><url><loc>https://example.com/about</loc><changefreq>yearly</changefreq><priority>0.1</priority></url><url><loc>https://example.com/news/0</loc></url><url><loc>https://example.com/news/1</loc></url><url><loc>https://example.com/news/2</loc></url><url><loc>https://example.com/news/3</loc></url><url><loc>https://example.com/news/4</loc></url><url><loc>https://example.com/news/5</loc></url><url><loc>https://example.com/news/6</loc></url><url><loc>https://example.com/news/7</loc></url><url><loc>https://example.com/news/8</loc></url><url><loc>https://example.com/news/9</loc></url><url><loc>https://example.com/news/10</loc></url></urlset>
 --
 -- See 'ToSitemapPathPiece' for more details.
 --
