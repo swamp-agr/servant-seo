@@ -52,7 +52,7 @@ library
                 , containers
                 , http-media
                 , lens >= 4.18.1
-                , servant
+                , servant >= 0.16
                 , servant-blaze
                 , servant-server
                 , text
