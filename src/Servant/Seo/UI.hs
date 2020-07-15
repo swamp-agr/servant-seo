@@ -7,7 +7,7 @@
 {-# LANGUAGE TypeOperators       #-}
 module Servant.Seo.UI where
 
-import           Control.Lens
+import           Control.Lens            hiding (Context)
 import qualified Data.ByteString.Lazy    as BSL
 import           Data.Coerce             (coerce)
 import qualified Data.List               as List
@@ -27,23 +27,25 @@ type RobotsAPI = "robots.txt" :> Get '[PlainText] Text
 
 -- | Extends API with 'RobotsAPI'.
 apiWithRobots
-  :: forall (api :: *). (HasServer api '[], HasRobots api)
+  :: forall (api :: *) (context :: [*]). (HasServer api context, HasRobots api)
   => Proxy api
+  -> Context context
   -> Proxy ( RobotsAPI :<|> api )
-apiWithRobots _ = Proxy
+apiWithRobots _ _ = Proxy
 
 -- | Provides "wrapper" around API.
 -- Both API and corresponding 'Server' wrapped with 'RobotsAPI' and 'serveRobots' handler.
 serveWithRobots
-  :: forall (api :: *). (HasServer api '[], HasRobots api)
+  :: forall (api :: *) (context :: [*]). (HasServer api context, HasRobots api)
   => ServerUrl
   -> Proxy api
+  -> Context context
   -> Server api
   -> Application
-serveWithRobots serverUrl proxy appServer = serve extendedProxy extendedServer
+serveWithRobots serverUrl proxy context appServer = serveWithContext extendedProxy context extendedServer
   where
     extendedProxy :: Proxy (RobotsAPI :<|> api)
-    extendedProxy = apiWithRobots proxy
+    extendedProxy = apiWithRobots proxy context
 
     extendedServer :: Server (RobotsAPI :<|> api)
     extendedServer = serveRobots serverUrl (toRobots proxy) :<|> appServer
@@ -75,43 +77,47 @@ type SitemapAPI
 
 -- | Extends API with 'SitemapAPI'.
 apiWithSitemap
-  :: forall (api :: *). (HasServer api '[], HasSitemap api)
+  :: forall (api :: *) (context :: [*]). (HasServer api context, HasSitemap api)
   => Proxy api
+  -> Context context
   -> Proxy ( SitemapAPI :<|> api )
-apiWithSitemap _ = Proxy
+apiWithSitemap _ _ = Proxy
 
 -- | Provides "wrapper" around API.
 -- Both API and corresponding 'Server' wrapped with 'SitemapAPI' and 'serveSitemap' handler.
 serveWithSitemap
-  :: forall (api :: *). (HasServer api '[], HasSitemap api)
+  :: forall (api :: *) (context :: [*]). (HasServer api context, HasSitemap api)
   => ServerUrl
   -> Proxy api
+  -> Context context
   -> Server api
   -> Application
-serveWithSitemap serverUrl proxy appServer = serve extendedProxy extendedServer
+serveWithSitemap serverUrl proxy context appServer = serveWithContext extendedProxy context extendedServer
   where
     extendedProxy :: Proxy (SitemapAPI :<|> api)
-    extendedProxy = apiWithSitemap proxy
+    extendedProxy = apiWithSitemap proxy context
 
     extendedServer :: Server (SitemapAPI :<|> api)
-    extendedServer = sitemapServer serverUrl proxy :<|> appServer
+    extendedServer = sitemapServer serverUrl proxy context :<|> appServer
 
 -- | 'Server' implementation for @sitemap.xml@ and indexed sitemaps (if present).
 sitemapServer
-  :: forall (api :: *). (HasServer api '[], HasSitemap api)
+  :: forall (api :: *) (context :: [*]). (HasServer api context, HasSitemap api)
   => ServerUrl
   -> Proxy api
+  -> Context context
   -> Server SitemapAPI
-sitemapServer serverUrl proxy = serveSitemap serverUrl proxy
-  :<|> serveNestedSitemap serverUrl proxy
+sitemapServer serverUrl proxy context = serveSitemap serverUrl proxy context
+  :<|> serveNestedSitemap serverUrl proxy context
 
 -- | Provides implementation for @sitemap.xml@.
 serveSitemap
-  :: forall (api :: *). (HasServer api '[], HasSitemap api)
+  :: forall (api :: *) (context :: [*]). (HasServer api context, HasSitemap api)
   => ServerUrl
   -> Proxy api
+  -> Context context
   -> Handler BSL.ByteString
-serveSitemap serverUrl proxy = do
+serveSitemap serverUrl proxy _ = do
   sitemap <- toSitemapInfo proxy
   pure $ sitemapUrlsToRootLBS serverUrl (urls sitemap)
   where
@@ -119,12 +125,13 @@ serveSitemap serverUrl proxy = do
 
 -- | Provides implementation for nested sitemaps.
 serveNestedSitemap
-  :: forall (api :: *). (HasServer api '[], HasSitemap api)
+  :: forall (api :: *) (context :: [*]). (HasServer api context, HasSitemap api)
   => ServerUrl
   -> Proxy api
+  -> Context context
   -> SitemapIx
   -> Handler BSL.ByteString
-serveNestedSitemap serverUrl proxy (SitemapIx sitemapIndex) = do
+serveNestedSitemap serverUrl proxy _ (SitemapIx sitemapIndex) = do
   sitemap <- toSitemapInfo proxy
   let urls = getUrls sitemap
   if urls & concatMap _sitemapUrlLoc & length & (<= 50000)
@@ -141,24 +148,32 @@ serveNestedSitemap serverUrl proxy (SitemapIx sitemapIndex) = do
 
 -- ** Both robots.txt and sitemap.xml
 
--- | Useful wrapper to extend API with both @robots.txt@ and @sitemap.xml@.
+-- | Useful wrapper to extend API with both @robots.txt@ and @sitemap.xml@ with servant context.
 serveWithSeo
-  :: forall (api :: *). (HasServer api '[], HasRobots api, HasSitemap api)
+  :: forall (api :: *) (context :: [*]). (HasServer api context, HasRobots api, HasSitemap api)
   => ServerUrl
   -> Proxy api
+  -> Context context
   -> Server api
   -> Application
-serveWithSeo serverUrl appProxy appServer = serve extendedProxy extendedServer
+serveWithSeo serverUrl appProxy appContext appServer = serveWithContext extendedProxy appContext extendedServer
   where
     extendedProxy :: Proxy (RobotsAPI :<|> SitemapAPI :<|> api)
     extendedProxy = Proxy
 
     extendedServer :: Server (RobotsAPI :<|> SitemapAPI :<|> api)
     extendedServer = serveRobots serverUrl (toRobots (Proxy :: Proxy (SitemapAPI :<|> api)))
-      :<|> sitemapServer serverUrl appProxy
+      :<|> sitemapServer serverUrl appProxy appContext
       :<|> appServer
 
-
+-- | Useful wrapper to extend API with both @robots.txt@ and @sitemap.xml@ without servant context.
+serveWithSeo'
+  :: forall (api :: *). (HasServer api '[], HasRobots api, HasSitemap api)
+  => ServerUrl
+  -> Proxy api
+  -> Server api
+  -> Application
+serveWithSeo' serverUrl appProxy appServer = serveWithSeo serverUrl appProxy EmptyContext appServer
 
 
 
