@@ -52,7 +52,7 @@ import           Servant.Seo.UI
 -- >>> import Text.Blaze (ToMarkup)
 -- >>> import Data.Text (Text)
 -- >>> import Servant.API
--- >>> import Servant (Proxy (..))
+-- >>> import Servant (Proxy (..), Context (..))
 -- >>> import Servant.Server (runHandler)
 -- >>> import Servant.HTML.Blaze (HTML)
 -- >>> import Data.Aeson (FromJSON)
@@ -113,8 +113,9 @@ import           Servant.Seo.UI
 --
 -- Moreover, API could be easily extended with 'apiWithRobots'.
 --
--- >>> :t apiWithRobots (Proxy :: Proxy API)
--- apiWithRobots (Proxy :: Proxy API) :: Proxy (RobotsAPI :<|> API)
+-- >>> :t apiWithRobots (Proxy :: Proxy API) EmptyContext
+-- apiWithRobots (Proxy :: Proxy API) EmptyContext
+--   :: Proxy (RobotsAPI :<|> API)
 --
 -- 'serveWithRobots' provides extension for both initial API and its implementation with 'RobotsAPI'.
 
@@ -145,14 +146,15 @@ import           Servant.Seo.UI
 --
 -- For 'SitemapInfo' there is also 'serveSitemap' function.
 --
--- >>> Right sitemapResponse <- runHandler $ serveSitemap serverUrl (Proxy :: Proxy API)
+-- >>> Right sitemapResponse <- runHandler $ serveSitemap serverUrl (Proxy :: Proxy API) EmptyContext
 -- >>> BSL8.putStrLn sitemapResponse
 -- <?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://example.com</loc><changefreq>monthly</changefreq><priority>1.0</priority></url><url><loc>https://example.com/about</loc><changefreq>yearly</changefreq><priority>0.1</priority></url></urlset>
 --
 -- Again, there is helper 'apiWithSitemap'.
 --
--- >>> :t apiWithSitemap (Proxy :: Proxy API)
--- apiWithSitemap (Proxy :: Proxy API) :: Proxy (SitemapAPI :<|> API)
+-- >>> :t apiWithSitemap (Proxy :: Proxy API) EmptyContext
+-- apiWithSitemap (Proxy :: Proxy API) EmptyContext
+--   :: Proxy (SitemapAPI :<|> API)
 --
 -- 'serveWithSitemap' function will extend both API and corresponding handlers with 'SitemapAPI'.
 
@@ -170,7 +172,7 @@ import           Servant.Seo.UI
 -- >>> instance ToSitemapPathPiece NewsUrl where getPathPiecesForIndexing _ _ = pure $ (NewsUrl . Text.pack . show) <$> [0 .. 10]
 -- >>> toSitemapInfo (Proxy :: Proxy PublicAPI)
 -- SitemapInfo {_sitemapInfoEntries = [SitemapEntry {_sitemapPathPieces = [], _sitemapQueryParts = [], _sitemapFrequency = Just Monthly, _sitemapPriority = Just "1.0"},SitemapEntry {_sitemapPathPieces = [UrlPathPiece "about"], _sitemapQueryParts = [], _sitemapFrequency = Just Yearly, _sitemapPriority = Just "0.1"},SitemapEntry {_sitemapPathPieces = [UrlPathPiece "news",CaptureValues ["0","1","2","3","4","5","6","7","8","9","10"]], _sitemapQueryParts = [], _sitemapFrequency = Nothing, _sitemapPriority = Nothing}], _sitemapInfoPresent = Just ()}
--- >>> Right sitemapResponse <- runHandler $ serveSitemap serverUrl (Proxy :: Proxy PublicAPI)
+-- >>> Right sitemapResponse <- runHandler $ serveSitemap serverUrl (Proxy :: Proxy PublicAPI) EmptyContext
 -- >>> BSL8.putStrLn sitemapResponse
 -- <?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://example.com</loc><changefreq>monthly</changefreq><priority>1.0</priority></url><url><loc>https://example.com/about</loc><changefreq>yearly</changefreq><priority>0.1</priority></url><url><loc>https://example.com/news/0</loc></url><url><loc>https://example.com/news/1</loc></url><url><loc>https://example.com/news/2</loc></url><url><loc>https://example.com/news/3</loc></url><url><loc>https://example.com/news/4</loc></url><url><loc>https://example.com/news/5</loc></url><url><loc>https://example.com/news/6</loc></url><url><loc>https://example.com/news/7</loc></url><url><loc>https://example.com/news/8</loc></url><url><loc>https://example.com/news/9</loc></url><url><loc>https://example.com/news/10</loc></url></urlset>
 --
@@ -188,7 +190,7 @@ import           Servant.Seo.UI
 -- >>> instance ToSitemapParamPart SearchPattern where getParamsForIndexing _ _ = pure $ (SearchPattern . Text.pack) <$> [ [ c1, c2 ] |  c1 <- ['a' .. 'e'], c2 <- ['0' .. '3'] ]
 -- >>> toSitemapInfo (Proxy :: Proxy SearchAPI)
 -- SitemapInfo {_sitemapInfoEntries = [SitemapEntry {_sitemapPathPieces = [UrlPathPiece "search"], _sitemapQueryParts = [(ParamName "q",[ParamValue "a0",ParamValue "a1",ParamValue "a2",ParamValue "a3",ParamValue "b0",ParamValue "b1",ParamValue "b2",ParamValue "b3",ParamValue "c0",ParamValue "c1",ParamValue "c2",ParamValue "c3",ParamValue "d0",ParamValue "d1",ParamValue "d2",ParamValue "d3",ParamValue "e0",ParamValue "e1",ParamValue "e2",ParamValue "e3"])], _sitemapFrequency = Nothing, _sitemapPriority = Nothing}], _sitemapInfoPresent = Just ()}
--- >>> Right sitemapResponse <- runHandler $ serveSitemap serverUrl (Proxy :: Proxy SearchAPI)
+-- >>> Right sitemapResponse <- runHandler $ serveSitemap serverUrl (Proxy :: Proxy SearchAPI) EmptyContext
 -- >>> BSL8.putStrLn sitemapResponse
 -- <?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://example.com/search?q=a0</loc></url><url><loc>https://example.com/search?q=a1</loc></url><url><loc>https://example.com/search?q=a2</loc></url><url><loc>https://example.com/search?q=a3</loc></url><url><loc>https://example.com/search?q=b0</loc></url><url><loc>https://example.com/search?q=b1</loc></url><url><loc>https://example.com/search?q=b2</loc></url><url><loc>https://example.com/search?q=b3</loc></url><url><loc>https://example.com/search?q=c0</loc></url><url><loc>https://example.com/search?q=c1</loc></url><url><loc>https://example.com/search?q=c2</loc></url><url><loc>https://example.com/search?q=c3</loc></url><url><loc>https://example.com/search?q=d0</loc></url><url><loc>https://example.com/search?q=d1</loc></url><url><loc>https://example.com/search?q=d2</loc></url><url><loc>https://example.com/search?q=d3</loc></url><url><loc>https://example.com/search?q=e0</loc></url><url><loc>https://example.com/search?q=e1</loc></url><url><loc>https://example.com/search?q=e2</loc></url><url><loc>https://example.com/search?q=e3</loc></url></urlset>
 --
@@ -201,7 +203,7 @@ import           Servant.Seo.UI
 --
 -- >>> instance ToSitemapPathPiece NewsUrl where getPathPiecesForIndexing _ _ = pure $ (NewsUrl . Text.pack . show) <$> [0 .. 50001]
 -- >>> type PublicAPI = HomeAPI :<|> AboutAPI :<|> AuthAPI :<|> NewsAPI
--- >>> Right sitemapResponse <- runHandler $ serveSitemap serverUrl (Proxy :: Proxy PublicAPI)
+-- >>> Right sitemapResponse <- runHandler $ serveSitemap serverUrl (Proxy :: Proxy PublicAPI) EmptyContext
 -- >>> BSL8.putStrLn sitemapResponse
 -- <?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><sitemap><loc>https://example.com/0/sitemap.xml</loc></sitemap><sitemap><loc>https://example.com/1/sitemap.xml</loc></sitemap><sitemap><loc>https://example.com/2/sitemap.xml</loc></sitemap><sitemap><loc>https://example.com/3/sitemap.xml</loc></sitemap></sitemapindex>
 --
@@ -211,9 +213,9 @@ import           Servant.Seo.UI
 -- $howto6
 --
 -- >>> type API = PublicAPI :<|> StaticAPI :<|> ProtectedAPI
--- >>> Right robotsResponse <- runHandler (serveRobots (ServerUrl "https://example.com") (toRobots $ apiWithSitemap (Proxy :: Proxy API)))
+-- >>> Right robotsResponse <- runHandler (serveRobots (ServerUrl "https://example.com") (toRobots $ apiWithSitemap (Proxy :: Proxy API) EmptyContext))
 -- >>> robotsResponse
 -- "User-agent: *\nDisallow /cdn/static\nDisallow /admin\n\nSitemap: https://example.com/sitemap.xml\n"
 --
 -- API extended with sitemap will automatically be populated with link to sitemap xml page.
--- To serve both robots and sitemap in advance to your API look for 'serveWithSeo' helper function.
+-- To serve both robots and sitemap in advance to your API look for 'serveWithSeo'' helper function.

@@ -286,6 +286,9 @@ instance {-# OVERLAPPABLE #-} (KnownNat status) =>
 instance {-# OVERLAPPING #-} (ToMarkup a) => HasSitemap (Get '[HTML] a) where
   toSitemapInfo _ = pure (SitemapInfo [mempty] (Just ()))
 
+instance {-# OVERLAPPING #-} (ToMarkup a) => HasSitemap (Get '[HTML] (Headers headers a)) where
+  toSitemapInfo _ = toSitemapInfo (Proxy :: Proxy (Get '[HTML] a))
+
 -- | Extracts 'Frequency' from API branch.
 instance (HasPeriod period, HasSitemap api) => HasSitemap (Frequency period :> api) where
   -- FIXME: compare with previous values, choose frequent one.

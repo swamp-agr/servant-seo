@@ -166,7 +166,7 @@ serveStatic = serveDirectoryWebApp "."
 startServer :: IO ()
 startServer = do
   Warp.runSettings Warp.defaultSettings
-    $ serveWithSeo website api server
+    $ serveWithSeo' website api server
   where
     website = "https://example.com"
 
