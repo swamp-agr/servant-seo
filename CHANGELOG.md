@@ -1,5 +1,10 @@
 # Changelog for servant-seo
 
+## 0.1.2 -- 2020-07-16
+
+- Add missing instance for HTML with headers (auth context).
+- Switch API extension from `serve` to `serveWithContext`.
+
 ## 0.1.1 -- 2020-07-12
 
 - Fix frequency processing.
