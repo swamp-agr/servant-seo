@@ -36,7 +36,7 @@ apiWithRobots _ _ = Proxy
 -- | Provides "wrapper" around API.
 -- Both API and corresponding 'Server' wrapped with 'RobotsAPI' and 'serveRobots' handler.
 serveWithRobots
-  :: forall (api :: *) (context :: [*]). (HasServer api context, HasRobots api)
+  :: forall (api :: *) (context :: [*]). (HasServer api context, HasRobots api, HasContextEntry (context .++ DefaultErrorFormatters) ErrorFormatters)
   => ServerUrl
   -> Proxy api
   -> Context context
@@ -86,7 +86,7 @@ apiWithSitemap _ _ = Proxy
 -- | Provides "wrapper" around API.
 -- Both API and corresponding 'Server' wrapped with 'SitemapAPI' and 'serveSitemap' handler.
 serveWithSitemap
-  :: forall (api :: *) (context :: [*]). (HasServer api context, HasSitemap api)
+  :: forall (api :: *) (context :: [*]). (HasServer api context, HasSitemap api, HasContextEntry (context .++ DefaultErrorFormatters) ErrorFormatters)
   => ServerUrl
   -> Proxy api
   -> Context context
@@ -150,7 +150,7 @@ serveNestedSitemap serverUrl proxy _ (SitemapIx sitemapIndex) = do
 
 -- | Useful wrapper to extend API with both @robots.txt@ and @sitemap.xml@ with servant context.
 serveWithSeo
-  :: forall (api :: *) (context :: [*]). (HasServer api context, HasRobots api, HasSitemap api)
+  :: forall (api :: *) (context :: [*]). (HasServer api context, HasRobots api, HasSitemap api, HasContextEntry (context .++ DefaultErrorFormatters) ErrorFormatters)
   => ServerUrl
   -> Proxy api
   -> Context context
