@@ -1,5 +1,10 @@
 # Changelog for servant-seo
 
+## 0.1.3 -- 2025-02-02
+
+- Support GHC 9.4.x (see [#4](https://github.com/swamp-agr/servant-seo/pull/4)).
+- Support newer `doctest` (see [#5](https://github.com/swamp-agr/servant-seo/pull/5)).
+
 ## 0.1.2 -- 2020-07-16
 
 - Add missing instance for HTML with headers (auth context).
