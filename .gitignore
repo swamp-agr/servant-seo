@@ -5,3 +5,4 @@ dist-newstyle
 .ghc*
 *.lock
 dist
+cabal.project.local
